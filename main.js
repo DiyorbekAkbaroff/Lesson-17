@@ -1,37 +1,46 @@
-const elSearch = document.querySelector(".js-search");
-const elCity = document.querySelector(".js-city");
-const elCel = document.querySelector(".js-celsius");
-const elCon = document.querySelector(".js-condition");
-const elImg = document.querySelector(".js-img");
-const elBtn = document.querySelector(".js-btn");
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
+const cityName = document.getElementById("cityName");
+const temperature = document.getElementById("temperature");
+const condition = document.getElementById("condition");
+const weatherIcon = document.getElementById("weatherIcon");
 
-const getWeatherInfo = async (location = "samarqand") => {
-    const url = `https://weatherapi-com.p.rapidapi.com/forecast.json?q=${location}&days=1`;
+const API_KEY = "efc5cb2692msh03cb48ac9da6823p1eb78ejsn742a9ac20d06";
+
+async function getWeather(city = "Samarqand") {
+    const url = `https://weatherapi-com.p.rapidapi.com/forecast.json?q=${city}&days=1`;
+
     const options = {
         method: 'GET',
         headers: {
-            'x-rapidapi-key': 'efc5cb2692msh03cb48ac9da6823p1eb78ejsn742a9ac20d06',
+            'x-rapidapi-key': API_KEY,
             'x-rapidapi-host': 'weatherapi-com.p.rapidapi.com'
         }
     };
 
     try {
         const response = await fetch(url, options);
-        const result = await response.json();
-
-        return result;
-    } catch (error) {
-        console.error(error);
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        console.error("Xatolik:", err);
     }
 }
-const renderPage = (city) => {
-    elCity.textContent = city.location.name;
-    elCon.textContent = city.current.condition.text;
-    elCel.textContent = "celsius: " + city.current.temp_c
-}
-getWeatherInfo().then(data => renderPage(data));
 
-elBtn.addEventListener("click", (evt) => {
-    const val = elSearch.value != "" ? elSearch.value : undefined;
-    getWeatherInfo(val).then(city => renderPage(city))
+function displayWeather(data) {
+    cityName.textContent = `Shahar: ${data.location.name}`;
+    temperature.textContent = `Harorat: ${data.current.temp_c}°C`;
+    condition.textContent = data.current.condition.text;
+    weatherIcon.src = data.current.condition.icon;
+    weatherIcon.style.display = "block";
+}
+
+searchBtn.addEventListener("click", async () => {
+    const city = searchInput.value.trim() || "Samarqand";
+    const data = await getWeather(city);
+    if (data) displayWeather(data);
+});
+
+getWeather().then(data => {
+    if (data) displayWeather(data);
 });
